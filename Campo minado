@@ -1,0 +1,205 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+/* bomba 0 ou 1
+ abertafechada 0 ou 1
+ vizinhos 0 ou 4
+*/
+
+int LEDVerde1 = 25;
+int LEDVerde2 = 33;
+int LEDVerde3 = 32;
+int LEDVerde4 = 35;
+int LEDVerde5 = 34;
+int LEDVermelho = 26;
+int buzzer = 27;
+
+void setup()
+{
+Serial.begin(9600);
+
+  pinMode(LEDVerde1, OUTPUT);
+  pinMode(LEDVerde2, OUTPUT);
+  pinMode(LEDVerde3, OUTPUT);
+  pinMode(LEDVerde4, OUTPUT);
+  pinMode(LEDVerde5, OUTPUT);
+  pinMode(LEDVermelho, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  
+  struct casa{
+    int bomba;
+    int abertafechada;
+    int vizinhos;
+    };
+
+casa jogo[5][5]; 
+
+int l, c;
+
+//inicialização.
+
+void inicializar(){
+  for(l = 0; l < 5; l++){
+    for(c = 0; c < 5; c++){
+      jogo[l][c].bomba = 0;
+      jogo[l][c].abertafechada = 0;
+      jogo[l][c].vizinhos = 0;
+    }
+  }
+}
+
+  // sortear bombas
+void sortear(int n){
+  int i;
+  srand(time(NULL));
+  for(i = 1; i <= 5; i++){
+    l = rand() % 5;
+    c = rand() % 5;
+    if(jogo[l][c].bomba == 0)
+      jogo[l][c].bomba = 1;
+    else(i--);
+    }
+  }
+
+  // verificando coordenadas: 0 não é valido, 1 é valido! 
+int coordenadavalida(int l, int c){
+  if(l >= 0 && l < 5 && c >= 0 && c < 5)
+    return 1;
+  else
+    return 0;
+}
+
+// bombas vizinhas
+
+int bvizinhos(int l, int c){
+  int quantidade = 0;
+
+  if(coordenadavalida(l - 1, c) && jogo[l-1][c].bomba)
+    quantidade++;
+  if(coordenadavalida(l + 1, c) && jogo[l+1][c].bomba)
+    quantidade++;
+  if(coordenadavalida(l, c - 1) && jogo[l][c-1].bomba)
+    quantidade++;
+  if(coordenadavalida(l, c + 1) && jogo[l][c+1].bomba)
+    quantidade++;
+  return quantidade;
+}
+
+  // contar os vizinhos
+
+void contarvizinhos(){
+  for(l = 0; l < 5; l++){
+    for(c = 0; c < 5; c++)
+      jogo[l][c].vizinhos = bvizinhos(l, c);  
+    }
+  }
+  
+
+  // impressão do jogo 
+
+void imprimir(){
+  Serial.print("\n\n\t ");
+  for(l = 0; l < 5; l++)
+    Serial.print("%d", l);
+  Serial.print("\n\t-------------------\n");
+  for(l = 0; l < 5; l++){
+    Serial.print("%d |", l);
+    for(c = 0; c < 5; c++){
+      if(jogo[l][c].abertafechada){
+        if(jogo[l][c].bomba)
+          Serial.print("*");
+        else
+          Serial.print("%d", jogo[l][c].vizinhos);
+      }
+      else
+        Serial.print(" ");
+      Serial.print("|")
+    }
+    Serial.print("\n\t-------------------\n");
+  }     
+}  
+
+// abrir casa
+  
+void abrircasa(int l, int c){
+  if(coordenadavalida(l, c) == 1 && jogo[l][c].abertafechada == 0){
+    jogo[l][c].abertafechada = 1;
+    if(jogo[l][c].vizinhos == 0){
+      abrircasa(l-1, c);
+      abrircasa(l+1, c);
+      abrircasa(l, c-1);
+      abrircasa(l, c+1);
+    }
+  }
+}
+
+// Verificar vitória.
+  
+int ganhou(){
+  int quantidade = 0;
+  
+  for(l = 0; l < 5; l++){
+    for(c = 0; c < 5; c++){
+      if(jogo[l][c].abertafechada == 0 && jogo[l][c].bomba == 0)
+        quantidade++;
+        if(quantidade == 1){
+          digitalWrite(LEDVerde1, HIGH);
+          }
+        if(quantidade == 2){
+          digitalWrite(LEDVerde2, HIGH);
+          }
+        if(quantidade == 3){
+          digitalWrite(LEDVerde3, HIGH);
+          }
+        if(quantidade == 4){
+          digitalWrite(LEDVerde4, HIGH);
+          }
+        if(quantidade == 5){
+          digitalWrite(LEDVerde5, HIGH);
+          }
+      }
+    }
+  return quantidade;
+} 
+  
+ // jogo em si. 
+
+void jogo(){
+  int linha, coluna;
+
+  do{
+    imprimir();
+    do{
+      Serial.print("\nDigite a coordenada de linha e depois coluna: ");
+      if(Serial.available()){
+        //scanf(%d%d, &linha, &coluna);
+        linha = Serial.parseInt();
+        }
+          if(Serial.available())
+            coluna = Serial.parseInt();
+      if(coordenadavalida(linha, coluna) == 0)
+        Serial.print("\nCoordenada invalida!");
+    }while(coordenadavalida(linha, coluna) == 0 || jogo[linha][coluna].abertafechada == 1);
+  
+    abrircasa(linha, coluna);
+  }while(ganhou() != 0 && jogo[linha][coluna].bomba == 0);
+  if(jogo[linha][coluna].bomba == 1){
+    Serial.print("\n\tPerdeu!\n");
+    digitalWrite(LEDVermelho, HIGH);
+    digitalWrite(buzzer, HIGH);
+    }
+  else
+    Serial.print("Ganhou!");
+}
+}
+void loop()
+{
+  inicializar();
+  sortear(1);
+  contarvizinhos();
+  Serial.print("\n\t\t\tCAMPO MINADO\n");
+  jogo();
+  
+  delay(10000);
+}
