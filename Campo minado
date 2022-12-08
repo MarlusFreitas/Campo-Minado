@@ -7,31 +7,19 @@
  vizinhos 0 ou 4
 */
 
-int LEDVerde1 = 25;
-int LEDVerde2 = 33;
-int LEDVerde3 = 32;
-int LEDVerde4 = 35;
-int LEDVerde5 = 34;
-int LEDVermelho = 26;
-int buzzer = 27;
+const int LEDVerde1 = 25;
+const int LEDVerde2 = 33;
+const int LEDVerde3 = 32;
+const int LEDVerde4 = 35;
+const int LEDVerde5 = 34;
+const int LEDVermelho = 26;
+const int buzzer = 27;
 
-void setup()
-{
-Serial.begin(9600);
-
-  pinMode(LEDVerde1, OUTPUT);
-  pinMode(LEDVerde2, OUTPUT);
-  pinMode(LEDVerde3, OUTPUT);
-  pinMode(LEDVerde4, OUTPUT);
-  pinMode(LEDVerde5, OUTPUT);
-  pinMode(LEDVermelho, OUTPUT);
-  pinMode(buzzer, OUTPUT);
-  
-  struct casa{
-    int bomba;
-    int abertafechada;
-    int vizinhos;
-    };
+struct casa{
+  int bomba;
+  int abertafechada;
+  int vizinhos;
+};
 
 casa jogo[5][5]; 
 
@@ -62,7 +50,7 @@ void sortear(int n){
     }
   }
 
-  // verificando coordenadas: 0 não é valido, 1 é valido! 
+// verificando coordenadas: 0 não é valido, 1 é valido! 
 int coordenadavalida(int l, int c){
   if(l >= 0 && l < 5 && c >= 0 && c < 5)
     return 1;
@@ -99,24 +87,27 @@ void contarvizinhos(){
   // impressão do jogo 
 
 void imprimir(){
-  Serial.print("\n\n\t ");
-  for(l = 0; l < 5; l++)
-    Serial.print("%d", l);
-  Serial.print("\n\t-------------------\n");
+    Serial.print(" ");
   for(l = 0; l < 5; l++){
-    Serial.print("%d |", l);
+    Serial.print(" ");
+    Serial.print(l);
+  }
+  Serial.print("\n  - - - - -\n");
+  for(l = 0; l < 5; l++){
+    Serial.print(l);
+    Serial.print("|");
     for(c = 0; c < 5; c++){
       if(jogo[l][c].abertafechada){
-        if(jogo[l][c].bomba)
+        if(jogo[l][c].bomba){
           Serial.print("*");
-        else
-          Serial.print("%d", jogo[l][c].vizinhos);
+        } else
+          Serial.print(jogo[l][c].vizinhos);
       }
       else
         Serial.print(" ");
-      Serial.print("|")
+      Serial.print("|");
     }
-    Serial.print("\n\t-------------------\n");
+    Serial.println("\n  - - - - -");
   }     
 }  
 
@@ -145,18 +136,24 @@ int ganhou(){
         quantidade++;
         if(quantidade == 1){
           digitalWrite(LEDVerde1, HIGH);
-          }
-        if(quantidade == 2){
-          digitalWrite(LEDVerde2, HIGH);
-          }
-        if(quantidade == 3){
-          digitalWrite(LEDVerde3, HIGH);
-          }
-        if(quantidade == 4){
-          digitalWrite(LEDVerde4, HIGH);
-          }
-        if(quantidade == 5){
-          digitalWrite(LEDVerde5, HIGH);
+          }else if(quantidade == 2){
+            digitalWrite(LEDVerde1, HIGH);
+            digitalWrite(LEDVerde2, HIGH);
+          }else if(quantidade == 3){
+            digitalWrite(LEDVerde1, HIGH);
+            digitalWrite(LEDVerde2, HIGH);
+            digitalWrite(LEDVerde3, HIGH);
+          }else if(quantidade == 4){
+            digitalWrite(LEDVerde1, HIGH);
+            digitalWrite(LEDVerde2, HIGH);
+            digitalWrite(LEDVerde3, HIGH);
+            digitalWrite(LEDVerde4, HIGH);
+          }else if(quantidade == 5){
+           digitalWrite(LEDVerde1, HIGH);
+           digitalWrite(LEDVerde2, HIGH);
+           digitalWrite(LEDVerde3, HIGH);
+           digitalWrite(LEDVerde4, HIGH);
+           digitalWrite(LEDVerde5, HIGH);
           }
       }
     }
@@ -165,21 +162,123 @@ int ganhou(){
   
  // jogo em si. 
 
-void jogo(){
-  int linha, coluna;
+void jogar(){
+  int linha = 0;
+  int coluna = 0; 
+  int leitura = 0;
 
   do{
     imprimir();
     do{
-      Serial.print("\nDigite a coordenada de linha e depois coluna: ");
+      Serial.println("\nDigite a coordenada linha e a coluna em sequência : ");
+      delay(10000);
       if(Serial.available()){
-        //scanf(%d%d, &linha, &coluna);
-        linha = Serial.parseInt();
-        }
-          if(Serial.available())
-            coluna = Serial.parseInt();
-      if(coordenadavalida(linha, coluna) == 0)
-        Serial.print("\nCoordenada invalida!");
+          switch (Serial.parseInt()) {
+            case 00:
+             linha = 0;
+             coluna = 0;
+             break;
+            case 01:
+             linha = 0;
+             coluna = 1;
+             break;
+          case 02:
+             linha = 0;
+             coluna = 2;
+             break;
+          case 03:
+             linha = 0;
+             coluna = 3;
+            break;
+          case 04:
+             linha = 0;
+             coluna = 4;
+            break;
+          case 10:
+             linha = 1;
+             coluna = 0;
+            break;
+          case 11:
+             linha = 1;
+             coluna = 1;
+            break;
+          case 12:
+             linha = 1;
+             coluna = 2;
+            break;
+         case 13:
+             linha = 1;
+             coluna = 3;
+            break;
+          case 14:
+             linha = 1;
+             coluna = 4;
+            break;
+          case 20:
+             linha = 2;
+             coluna = 0;
+            break;
+          case 21:
+             linha = 2;
+             coluna = 1;
+            break;
+          case 22:
+             linha = 2;
+             coluna = 2;
+            break;
+          case 23:
+             linha = 2;
+             coluna = 3;
+            break;
+           case 24:
+             linha = 2;
+             coluna = 4;
+            break;
+           case 30:
+             linha = 3;
+             coluna = 0;
+            break;
+           case 31:
+             linha = 3;
+             coluna = 1;
+            break;
+           case 32:
+             linha = 3;
+             coluna = 2;
+            break;
+           case 33:
+             linha = 3;
+             coluna = 3;
+            break;
+           case 34:
+             linha = 3;
+             coluna = 4;
+            break;
+           case 40:
+             linha = 4;
+             coluna = 0;
+            break;
+           case 41:
+             linha = 4;
+             coluna = 1;
+            break;
+           case 42:
+             linha = 4;
+             coluna = 2;
+            break;
+           case 43:
+             linha = 4;
+             coluna = 3;
+            break;
+           case 44:
+             linha = 4;
+             coluna = 4;
+            break;
+           default:
+            Serial.print("\nCoordenada invalida!");
+            break;
+          }
+     }
     }while(coordenadavalida(linha, coluna) == 0 || jogo[linha][coluna].abertafechada == 1);
   
     abrircasa(linha, coluna);
@@ -192,14 +291,30 @@ void jogo(){
   else
     Serial.print("Ganhou!");
 }
-}
-void loop()
+
+
+
+void setup()
 {
+Serial.begin(9600);
+
+  pinMode(LEDVerde1, OUTPUT);
+  pinMode(LEDVerde2, OUTPUT);
+  pinMode(LEDVerde3, OUTPUT);
+  pinMode(LEDVerde4, OUTPUT);
+  pinMode(LEDVerde5, OUTPUT);
+  pinMode(LEDVermelho, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  
   inicializar();
   sortear(1);
   contarvizinhos();
-  Serial.print("\n\t\t\tCAMPO MINADO\n");
-  jogo();
-  
-  delay(10000);
 }
+
+void loop()
+{
+  Serial.print("      CAMPO MINADO");
+  jogar();
+
+  delay(5000);
+  }
